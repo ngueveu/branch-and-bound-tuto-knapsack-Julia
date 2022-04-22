@@ -11,8 +11,6 @@ or
 
 `include("PATH-TO-MAIN-DIRECTORY/main.jl")`
 
-By default the resulting branch-and-bound tree is displayed
-
 ## To solve a specific instance (from the terminal)
 
 `cd PATH-TO-MAIN-DIRECTORY`
