@@ -29,7 +29,7 @@ function readKnaptxtInstance(filename)
     return price, weight, capacity
 end
 
-function TestsSondabilite_LP(model2, x, BestProfit, Bestsol)
+function testSondability_LP(model2, x, BestProfit, Bestsol)
     TA, TO, TR = false, false, false
     if(termination_status(model2) == MOI.INFEASIBLE)#Test de faisabilite
         TA=true
@@ -55,7 +55,7 @@ function TestsSondabilite_LP(model2, x, BestProfit, Bestsol)
 end
 
 
-function SeparerNoeud_lexicographic_depthfirst!(listobjs, listvals, n)
+function separateNodeThenchooseNext_lexicographic_depthfirst!(listobjs, listvals, n)
     # this node is non-sondable. Apply the branching criterion to separate it into two subnodes
     # and choose the child-node at the left
 
@@ -76,7 +76,7 @@ function SeparerNoeud_lexicographic_depthfirst!(listobjs, listvals, n)
 end
 
 
-function ExplorerAutreNoeud_depthfirst!(listobjs, listvals, listnodes)
+function exploreNextNode_depthfirst!(listobjs, listvals, listnodes)
     #this node is sondable, go back to parent node then right child if possible
 
     stop=false
@@ -109,28 +109,28 @@ function ExplorerAutreNoeud_depthfirst!(listobjs, listvals, listnodes)
 end
 
 
-function MajModele_LP!(model2, x, listobjs, listvals)
+function updateModele_LP!(model2, x, listobjs, listvals)
     for i in 1:length(listobjs)
         set_lower_bound(x[listobjs[i]],listvals[i])
         set_upper_bound(x[listobjs[i]],listvals[i])
     end
 end
 
-function Reset_LP!(model2, x, listobjs)
+function reset_LP!(model2, x, listobjs)
     for i in 1:length(listobjs)
         set_lower_bound(x[listobjs[i]],0.0)
         set_upper_bound(x[listobjs[i]],1.0)
     end
 end
 
-function Reset_allLP!(model2, x)
+function resetAll_LP!(model2, x)
     for i in 1:length(x)
         set_lower_bound(x[i],0.0)
         set_upper_bound(x[i],1.0)
     end
 end
 
-function CreationModele_LP(price, weight, capacity)
+function createModel_LP(price, weight, capacity)
 # ROOT NODE
 
     n=length(price)
@@ -154,11 +154,11 @@ function CreationModele_LP(price, weight, capacity)
 end
 
 
-function SolveKnapInstance(filename)
+function solveKnapInstance(filename)
 
     price, weight, capacity = readKnaptxtInstance(filename)
 
-    model2, x = CreationModele_LP(price, weight, capacity)
+    model2, x = createModel_LP(price, weight, capacity)
 
     #create the structure to memorize the search tree for visualization at the end
     trParentnodes=Int64[] #will store orig node of arc in search tree
@@ -190,7 +190,7 @@ function SolveKnapInstance(filename)
 
 
         #create LP of current node
-        MajModele_LP!(model2, x, listobjs, listvals)
+        updateModele_LP!(model2, x, listobjs, listvals)
 
         println(model2)
 
@@ -212,19 +212,19 @@ function SolveKnapInstance(filename)
 
         println("\nPrevious Solution memorized ", Bestsol, " with bestprofit ", BestProfit, "\n")
 
-        TA, TO, TR, Bestsol, BestProfit = TestsSondabilite_LP(model2, x, BestProfit, Bestsol)
+        TA, TO, TR, Bestsol, BestProfit = testSondability_LP(model2, x, BestProfit, Bestsol)
 
         is_node_sondable = TA || TO || TR
 
-        #Reset_LP!(model2, x, listobjs)
+        #reset_LP!(model2, x, listobjs)
 
         if(!is_node_sondable)
-            SeparerNoeud_lexicographic_depthfirst!(listobjs, listvals, length(price))
+            separateNodeThenchooseNext_lexicographic_depthfirst!(listobjs, listvals, length(price))
         else
-            stop = ExplorerAutreNoeud_depthfirst!(listobjs, listvals, listnodes)
+            stop = exploreNextNode_depthfirst!(listobjs, listvals, listnodes)
         end
 
-        Reset_allLP!(model2, x)
+        resetAll_LP!(model2, x)
 
         current_node_number = current_node_number + 1
     end
