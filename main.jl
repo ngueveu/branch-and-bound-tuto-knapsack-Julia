@@ -15,7 +15,7 @@ end
 
 println("\n Branch-and-Bound for solving a knapsack problem. \n\n Solving instance '" * INSTANCE * "'\n")
 
-BestProfit, Bestsol, trParentnodes, trChildnodes, trNamenodes = SolveKnapInstance(INSTANCE)
+BestProfit, Bestsol, trParentnodes, trChildnodes, trNamenodes = solveKnapInstance(INSTANCE)
 
 println("\n******\n\nOptimal value = ", BestProfit, "\n\nOptimal x=", Bestsol)
 
