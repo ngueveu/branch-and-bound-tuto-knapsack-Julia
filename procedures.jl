@@ -1,12 +1,16 @@
+#import Pkg;
+Pkg.add("GraphRecipes");
+Pkg.add("Plots");
+using GraphRecipes, Plots #only used to visualize the search tree at the end of the branch-and-bound
 
 Pkg.add("Clp");
 Pkg.add("JuMP");
-using JuMP, Clp #used
+using JuMP, Clp #to comment for the lab class
 
 function readKnaptxtInstance(filename)
-    price=[]
-    weight=[]
-    KnapCap=[]
+    price=Int64[]
+    weight=Int64[]
+    KnapCap=Int64[]
     open(filename) do f
         for i in 1:3
             tok = split(readline(f))
@@ -163,17 +167,17 @@ function solveKnapInstance(filename)
     #create the structure to memorize the search tree for visualization at the end
     trParentnodes=Int64[] #will store orig node of arc in search tree
     trChildnodes=Int64[] #will store destination node of arc in search tree
-    trNamenodes=[] #will store names of nodes in search tree
+    trNamenodes=Int64[] #will store names of nodes in search tree
 
     #intermediate structure to navigate in the search tree
-    listobjs=[]
-    listvals=[]
-    listnodes=[]
+    listobjs=Int64[]
+    listvals=Float64[]
+    listnodes=Int64[]
 
-    BestProfit=-1
-    Bestsol=[]
+    BestProfit::Float64=-1.0
+    Bestsol=Float64[]
 
-    current_node_number=0
+    current_node_number::Int64=0
     stop = false
 
     while(!stop)
@@ -232,5 +236,20 @@ function solveKnapInstance(filename)
     println("\n******\n\nOptimal value = ", BestProfit, "\n\nOptimal x=", Bestsol)
 
     return BestProfit, Bestsol, trParentnodes, trChildnodes, trNamenodes
+
+end
+
+
+function solveNdisplayKnap(filename)
+
+    println("\n Branch-and-Bound for solving a knapsack problem. \n\n Solving instance '" * filename * "'\n")
+
+    BestProfit, Bestsol, trParentnodes, trChildnodes, trNamenodes = solveKnapInstance(filename)
+
+    println("\n******\n\nOptimal value = ", BestProfit, "\n\nOptimal x=", Bestsol)
+
+    println("\n Branch-and-bound tree visualization : start display ...")
+    display(graphplot(trParentnodes, trChildnodes, names=trNamenodes, method=:tree))
+    println("... end display. \n\n")
 
 end
